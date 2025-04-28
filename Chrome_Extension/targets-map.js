@@ -307,158 +307,65 @@
         });
       });
     }
-  
-    // function displayAllTargetsMap(allData, insertAfterElement) {
-    //     const mapWrapper = document.createElement("div");
-    //     mapWrapper.id = "targets-all-map-container";
-    //     mapWrapper.style.width = "100%";
-    //     mapWrapper.style.marginTop = "15px";
-    
-    //     const mapContainer = document.createElement("div");
-    //     mapContainer.style.height = "600px";
-    //     mapContainer.style.width = "100%";
-    //     mapContainer.style.border = "1px solid #ccc";
-    //     mapContainer.style.borderRadius = "8px";
-    
-    //     mapWrapper.appendChild(mapContainer);
-    //     insertAfterElement.parentNode.insertBefore(mapWrapper, insertAfterElement.nextSibling);
-    
-    //     const map = L.map(mapContainer).setView([0, 0], 2);  // Initialize with a default view (global view)
-    
-    //     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    //         attribution: '© OpenStreetMap contributors',
-    //     }).addTo(map);
-    
-    //     L.control.scale().addTo(map);
-    
-    //     const sightingsByLocation = {};
-    
-    //     for (const key in allData) {
-    //         const sightings = allData[key];
-    //         sightings.forEach(loc => {
-    //             const keyStr = `${loc.lat.toFixed(4)},${loc.lng.toFixed(4)}`;
-    //             if (!sightingsByLocation[keyStr]) {
-    //                 sightingsByLocation[keyStr] = [];
-    //             }
-    //             sightingsByLocation[keyStr].push(loc);
-    //         });
-    //     }
-    
-    //     const locationsArray = Object.entries(sightingsByLocation).map(([key, locs]) => {
-    //         const [lat, lng] = key.split(",").map(Number);
-    //         return { lat, lng, species: locs };
-    //     });
-    
-    //     const colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
-    //         .domain([1, d3.max(locationsArray, d => d.species.length)]);
 
-    //     function addColorLegend(map, colorScale, minValue, maxValue, label = "Species Count") {
-    //         const legend = L.control({ position: "bottomright" });
-    //         legend.onAdd = function () {
-    //             const div = L.DomUtil.create('div', 'info legend');
-    //             div.innerHTML = `
-    //                 <strong>${label}</strong><br>
-    //                 <canvas id="legend-canvas-${map._leaflet_id}" width="100" height="10" style="margin-top:4px;"></canvas><br>
-    //                 <div style="display: flex; justify-content: space-between; font-size: 12px;">
-    //                     <span>${minValue}</span><span>${maxValue}</span>
-    //                 </div>`;
-    //             return div;
-    //         };
-    //         legend.addTo(map);
-    
-    //         setTimeout(() => {
-    //             const canvas = document.getElementById(`legend-canvas-${map._leaflet_id}`);
-    //             if (!canvas) return;
-    //             const ctx = canvas.getContext('2d');
-    //             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    //             for (let i = 0; i <= 1; i += 0.01) {
-    //                 gradient.addColorStop(i, colorScale(minValue + i * (maxValue - minValue)));
-    //             }
-    //             ctx.fillStyle = gradient;
-    //             ctx.fillRect(0, 0, canvas.width, canvas.height);
-    //         }, 100);
-    //     }
-    
-    //     locationsArray.sort((a, b) => a.species.length - b.species.length); // Smallest first
-    
-    //     addColorLegend(map, colorScale, locationsArray['0'].species.length, locationsArray.at(-1).species.length, "Species Count");
-
-    //     // Create a LatLngBounds object to fit all the markers
-    //     const bounds = L.latLngBounds();
-    
-    //     locationsArray.forEach(loc => {
-    //         const marker = L.circleMarker([loc.lat, loc.lng], {
-    //             radius: 10,
-    //             fillColor: colorScale(loc.species.length),
-    //             color: "#000",
-    //             weight: 1,
-    //             fillOpacity: 0.8
-    //         }).bindPopup(
-    //             `<div style="max-height:200px; overflow-y:auto;">
-    //             <strong>${loc.species['0'].locName}</strong><br>
-    //             <strong>${loc.species.length} Species</strong><br>
-    //             ${loc.species.map(s => `<a href="https://ebird.org/checklist/${s.subId}" target="_blank" style="font-weight:bold;">${s.comName}</a> (${s.obsDt})`).join("<br>")}
-    //             </div>`
-    //         );
-    
-    //         marker.addTo(map);
-    
-    //         // Extend the bounds to include this marker
-    //         bounds.extend(marker.getLatLng());
-    //     });
-
-    //     // Set the map's view to fit the bounds of all the markers
-    //     map.fitBounds(bounds);
-
-    // }    
-
-    function displayAllTargetsMap(allData, insertAfterElement) {
+    async function displayAllTargetsMap(allData, insertAfterElement, options = {}) {
         const mapWrapper = document.createElement("div");
         mapWrapper.id = "targets-all-map-container";
         mapWrapper.style.width = "100%";
         mapWrapper.style.marginTop = "15px";
-        
+    
         // Create the checkbox for toggling exotic species
         const exoticCheckboxWrapper = document.createElement("div");
         exoticCheckboxWrapper.style.marginBottom = "10px";
-        
+    
         const exoticCheckbox = document.createElement("input");
         exoticCheckbox.type = "checkbox";
         exoticCheckbox.id = "exotic-toggle";
-        exoticCheckbox.checked = false;  // By default, exclude exotics
-        
+        exoticCheckbox.checked = false; // By default, exclude exotics
+    
         const exoticLabel = document.createElement("label");
         exoticLabel.setAttribute("for", "exotic-toggle");
-        exoticLabel.textContent = "Exclude Exotic Species";  // Updated label
-        
+        exoticLabel.textContent = "Exclude Exotic Species";
+    
         exoticCheckboxWrapper.appendChild(exoticCheckbox);
         exoticCheckboxWrapper.appendChild(exoticLabel);
         insertAfterElement.parentNode.insertBefore(exoticCheckboxWrapper, insertAfterElement.nextSibling);
-        
+    
         const mapContainer = document.createElement("div");
         mapContainer.style.height = "600px";
         mapContainer.style.width = "100%";
         mapContainer.style.border = "1px solid #ccc";
         mapContainer.style.borderRadius = "8px";
-        
+    
         mapWrapper.appendChild(mapContainer);
         insertAfterElement.parentNode.insertBefore(mapWrapper, insertAfterElement.nextSibling);
-        
-        const map = L.map(mapContainer).setView([0, 0], 2);  // Initialize with a default view (global view)
-
+    
+        const map = L.map(mapContainer).setView([0, 0], 2);
+    
         let userMovedMap = false;
-
+    
         map.on('zoomstart', () => { userMovedMap = true; });
         map.on('dragstart', () => { userMovedMap = true; });
-        
+    
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© OpenStreetMap contributors',
         }).addTo(map);
-        
+    
         L.control.scale().addTo(map);
-        
+    
+        // 🛑 If customMonths is set, fetch historic sightings first
+        if (options.customMonths && options.customMonths.length > 0) {
+            const historicSightings = await fetchHistoricSightings(
+                options.customYear,
+                options.customMonths,
+                options.regionCode,
+                options.targetSpecies
+            );
+            allData = transformHistoricSightingsToAllData(historicSightings);
+        }
+    
         const sightingsByLocation = {};
-        
+    
         for (const key in allData) {
             const sightings = allData[key];
             sightings.forEach(loc => {
@@ -469,12 +376,12 @@
                 sightingsByLocation[keyStr].push(loc);
             });
         }
-        
+    
         const locationsArray = Object.entries(sightingsByLocation).map(([key, locs]) => {
             const [lat, lng] = key.split(",").map(Number);
             return { lat, lng, species: locs };
         });
-        
+    
         const colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
             .domain([1, d3.max(locationsArray, d => d.species.length)]);
     
@@ -491,7 +398,7 @@
                 return div;
             };
             legend.addTo(map);
-        
+    
             setTimeout(() => {
                 const canvas = document.getElementById(`legend-canvas-${map._leaflet_id}`);
                 if (!canvas) return;
@@ -504,35 +411,28 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }, 100);
         }
-        
-        locationsArray.sort((a, b) => a.species.length - b.species.length); // Smallest first
-        
+    
+        locationsArray.sort((a, b) => a.species.length - b.species.length);
+    
         addColorLegend(map, colorScale, locationsArray[0].species.length, locationsArray.at(-1).species.length, "Species Count");
     
-        // Create a LatLngBounds object to fit all the markers
         const bounds = L.latLngBounds();
-    
-        // Store markers for later removal
         let markers = [];
     
-        // Filter locations based on the exotic checkbox
         function updateMarkers() {
-            const excludeExotics = exoticCheckbox.checked;  // Exclude exotics when checkbox is checked
-            
-            // Clear existing markers
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];  // Reset markers array
+            const excludeExotics = exoticCheckbox.checked;
     
-            // Filter and create new markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+    
             locationsArray.forEach(loc => {
-                const filteredSpecies = loc.species.filter(s => !excludeExotics || (s.exoticCategory !== "X" && s.exoticCategory !== "P" && s.exoticCategory !== "E"));  // Exclude exotics if checked
-                // Skip locations with no displayable species
+                const filteredSpecies = loc.species.filter(s =>
+                    !excludeExotics || (s.exoticCategory !== "X" && s.exoticCategory !== "P" && s.exoticCategory !== "E")
+                );
                 if (filteredSpecies.length === 0) return;
     
-                // Calculate the new color based on the filtered species count
                 const color = colorScale(filteredSpecies.length);
     
-                // Create new marker
                 const marker = L.circleMarker([loc.lat, loc.lng], {
                     radius: 10,
                     color: "#000",
@@ -541,31 +441,79 @@
                     fillColor: color,
                 }).bindPopup(
                     `<div style="max-height:200px; overflow-y:auto;">
-                    <strong>${loc.species['0'].locName}</strong><br>
-                    <strong>${filteredSpecies.length} Species</strong><br>
-                    ${filteredSpecies.map(s => `<a href="https://ebird.org/checklist/${s.subId}" target="_blank" style="font-weight:bold;">${s.comName}</a> (${s.obsDt})`).join("<br>")}
+                        <strong>${loc.species['0'].locName}</strong><br>
+                        <strong>${filteredSpecies.length} Species</strong><br>
+                        ${filteredSpecies.map(s => `<a href="https://ebird.org/checklist/${s.subId}" target="_blank" style="font-weight:bold;">${s.comName}</a> (${s.obsDt})`).join("<br>")}
                     </div>`
                 );
     
-                // Add marker to the map
                 marker.addTo(map);
-                markers.push(marker);  // Store marker reference
+                markers.push(marker);
     
-                // Extend the bounds to include this marker
                 bounds.extend(marker.getLatLng());
             });
     
-            // Set the map's view to fit the bounds of all the markers
             if (!userMovedMap) {
                 map.fitBounds(bounds);
-            }            
+            }
         }
-        
-        // Initialize markers when the map is first displayed
-        updateMarkers();
     
-        // Re-filter the map when the checkbox changes
+        updateMarkers();
         exoticCheckbox.addEventListener("change", updateMarkers);
+    
+        // --- Helper functions ---
+    
+        async function fetchHistoricSightings(year, months, regionCode, targetSpecies) {
+            const datesToFetch = [];
+    
+            months.forEach(month => {
+                const daysInMonth = new Date(year, month, 0).getDate();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    datesToFetch.push(`${year}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}`);
+                }
+            });
+    
+            const sightings = [];
+    
+            for (const date of datesToFetch) {
+                try {
+                    const url = `https://api.ebird.org/v2/data/obs/${regionCode}/historic/${date}`;
+                    const response = await fetch(url, {
+                        headers: { "X-eBirdApiToken": "YOUR_API_KEY" }
+                    });
+                    const data = await response.json();
+    
+                    const filteredData = data.filter(obs => targetSpecies.includes(obs.comName));
+                    sightings.push(...filteredData);
+                } catch (err) {
+                    console.error(`Failed to fetch for ${date}:`, err);
+                }
+            }
+    
+            return sightings;
+        }
+    
+        function transformHistoricSightingsToAllData(sightings) {
+            const allData = {};
+    
+            sightings.forEach(obs => {
+                const key = obs.speciesCode;
+                if (!allData[key]) {
+                    allData[key] = [];
+                }
+                allData[key].push({
+                    lat: obs.lat,
+                    lng: obs.lng,
+                    locName: obs.locName,
+                    subId: obs.subId,
+                    comName: obs.comName,
+                    obsDt: obs.obsDt,
+                    exoticCategory: obs.exoticCategory || "",
+                });
+            });
+    
+            return allData;
+        }
     }    
     
 
